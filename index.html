@@ -1,78 +1,347 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>DuBeto Barbearia</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbearia DuBeto - Agendamentos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        :root {
+            --primary: #1a1a1a;
+            --secondary: #d4af37;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
         body {
-            background: linear-gradient(90deg, red 33%, white 33% 66%, blue 66%);
-            font-family: Arial, sans-serif;
-            color: #333;
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
             margin: 0;
             padding: 0;
+            background-image: url('https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
         }
+        
         .container {
-            background: rgba(255,255,255,0.8);
-            max-width: 400px;
-            margin: 40px auto;
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            border-radius: 8px;
         }
-        h1 {
+        
+        header {
+            background-color: var(--primary);
+            color: var(--secondary);
+            padding: 20px 0;
             text-align: center;
-            color: #222;
+            border-bottom: 5px solid var(--secondary);
+            margin-bottom: 30px;
         }
-        label, input, button {
+        
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
             display: block;
-            width: 100%;
-            margin-bottom: 12px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--primary);
         }
-        button {
-            background-color: red;
-            color: white;
+        
+        input, select {
+            width: 100%;
             padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: var(--secondary);
+            color: var(--primary);
             border: none;
+            padding: 12px 20px;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
         }
+        
         button:hover {
-            background-color: blue;
+            background-color: #c9a227;
+            transform: translateY(-2px);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: var(--secondary);
+        }
+        
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-export {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .btn-export-server {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
+    <header>
+        <div class="container">
+            <div class="logo">✂️</div>
+            <h1>Barbearia DuBeto</h1>
+            <p>Agendamento de clientes</p>
+        </div>
+    </header>
+    
     <div class="container">
-        <h1>DuBeto Barbearia</h1>
-        <form id="form-agendamento">
-            <label for="nome">Nome do cliente:</label>
-            <input type="text" id="nome" name="nome" required>
+        <div id="message" class="hidden"></div>
+        
+        <div class="card">
+            <h2>Novo Agendamento</h2>
+            <form id="agendamentoForm">
+                <div class="form-group">
+                    <label for="nome">Nome do Cliente</label>
+                    <input type="text" id="nome" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefone">Telefone</label>
+                    <input type="tel" id="telefone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="servico">Serviço</label>
+                    <select id="servico" required>
+                        <option value="">Selecione um serviço</option>
+                        <option value="Corte de Cabelo">Corte de Cabelo</option>
+                        <option value="Barba">Barba</option>
+                        <option value="Corte + Barba">Corte + Barba</option>
+                        <option value="Pezinho">Pezinho</option>
+                        <option value="Sobrancelha">Sobrancelha</option>
+                        <option value="Navalha">Navalha</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="barbeiro">Barbeiro</label>
+                    <select id="barbeiro" required>
+                        <option value="">Selecione um barbeiro</option>
+                        <option value="João">João</option>
+                        <option value="Carlos">Carlos</option>
+                        <option value="Marcos">Marcos</option>
+                        <option value="Antônio">Antônio</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="data">Data</label>
+                    <input type="date" id="data" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="hora">Hora</label>
+                    <input type="time" id="hora" required>
+                </div>
+                
+                <button type="submit">Agendar</button>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h2>Agendamentos</h2>
+            <div class="actions">
+                <button id="exportBtn" class="btn-export">Exportar para Excel</button>
+                <button id="exportServerBtn" class="btn-export-server">Enviar para Servidor</button>
+            </div>
             
-            <label for="servico">Serviço:</label>
-            <input type="text" id="servico" name="servico" required>
-            
-            <label for="horario">Horário:</label>
-            <input type="datetime-local" id="horario" name="horario" required>
-            
-            <button type="submit">Agendar</button>
-        </form>
-        <div id="mensagem"></div>
+            <table id="agendamentosTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Telefone</th>
+                        <th>Serviço</th>
+                        <th>Barbeiro</th>
+                        <th>Data</th>
+                        <th>Hora</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="agendamentosBody">
+                    <!-- Os agendamentos serão inseridos aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
     </div>
+
     <script>
-        document.getElementById('form-agendamento').onsubmit = async function(e) {
-            e.preventDefault();
-            const dados = {
-                nome: document.getElementById('nome').value,
-                servico: document.getElementById('servico').value,
-                horario: document.getElementById('horario').value
-            };
-            const resposta = await fetch('/api/agendar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dados)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar agendamentos do localStorage
+            let agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+            
+            // Elementos do DOM
+            const form = document.getElementById('agendamentoForm');
+            const tableBody = document.getElementById('agendamentosBody');
+            const exportBtn = document.getElementById('exportBtn');
+            const exportServerBtn = document.getElementById('exportServerBtn');
+            const messageDiv = document.getElementById('message');
+            
+            // Função para exibir mensagem
+            function showMessage(text, isError = false) {
+                messageDiv.textContent = text;
+                messageDiv.className = isError ? 'error-message' : 'success-message';
+                messageDiv.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    messageDiv.classList.add('hidden');
+                }, 3000);
+            }
+            
+            // Função para renderizar a tabela
+            function renderTable() {
+                tableBody.innerHTML = '';
+                
+                agendamentos.forEach((agendamento, index) => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${agendamento.nome}</td>
+                        <td>${agendamento.telefone}</td>
+                        <td>${agendamento.servico}</td>
+                        <td>${agendamento.barbeiro}</td>
+                        <td>${formatDate(agendamento.data)}</td>
+                        <td>${agendamento.hora}</td>
+                        <td class="actions">
+                            <button class="btn-delete" data-index="${index}">Excluir</button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // Adicionar event listeners aos botões de deletar
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        agendamentos.splice(index, 1);
+                        localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+                        renderTable();
+                        showMessage('Agendamento removido com sucesso!');
+                    });
+                });
+            }
+            
+            // Função para formatar data
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pt-BR');
+            }
+            
+            // Event listener para o formulário
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const novoAgendamento = {
+                    nome: document.getElementById('nome').value,
+                    telefone: document.getElementById('telefone').value,
+                    servico: document.getElementById('servico').value,
+                    barbeiro: document.getElementById('barbeiro').value,
+                    data: document.getElementById('data').value,
+                    hora: document.getElementById('hora').value,
+                    dataAgendamento: new Date().toISOString()
+                };
+                
+                agendamentos.push(novoAgendamento);
+                localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+                
+                // Limpar o formulário
+                form.reset();
+                
+                // Atualizar a tabela
+                renderTable();
+                
+                // Mostrar mensagem de sucesso
+                showMessage('Agendamento realizado com sucesso!');
             });
-            const resultado = await resposta.json();
-            document.getElementById('mensagem').textContent = resultado.mensagem || 'Agendado com sucesso!';
-        };
-    </script>
-</body>
-</html>
+            
+            // Event listener para exportar para Excel
+            exportBtn.addEventListener('click', function() {
+                if (agendamentos.length === 0) {
+                    showMessage('Nenhum agendamento para exportar!', true);
+                    return;
+                }
+                
+                // Preparar dados para exportação
+                const dadosE
