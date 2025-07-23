@@ -2,347 +2,39 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbearia DuBeto - Agendamentos</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>Salvar Nome Localmente</title>
     <style>
-        :root {
-            --primary: #1a1a1a;
-            --secondary: #d4af37;
-            --light: #f8f9fa;
-            --dark: #343a40;
-        }
-        
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #000000; /* Fundo preto */
-            margin: 0;
-            padding: 0;
-            color: #ffffff; /* Texto branco para contraste */
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            background-color: var(--primary);
-            color: var(--secondary);
-            padding: 20px 0;
-            text-align: center;
-            border-bottom: 5px solid var(--secondary);
-            margin-bottom: 30px;
-        }
-        
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
-        
-        .logo {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-        
-        .card {
-            background-color: rgba(30, 30, 30, 0.9); /* Card mais escuro */
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            margin-bottom: 20px;
-            color: #ffffff; /* Texto branco */
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: var(--secondary); /* Labels dourados */
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #444;
-            border-radius: 5px;
-            font-size: 16px;
-            background-color: #222;
-            color: #fff;
-        }
-        
-        button {
-            background-color: var(--secondary);
-            color: var(--primary);
-            border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        
-        button:hover {
-            background-color: #c9a227;
-            transform: translateY(-2px);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #444;
-            color: #ffffff;
-        }
-        
-        th {
-            background-color: var(--primary);
-            color: var(--secondary);
-        }
-        
-        tr:hover {
-            background-color: #222;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn-delete {
-            background-color: #dc3545;
-            color: white;
-        }
-        
-        .btn-export {
-            background-color: #28a745;
-            color: white;
-        }
-        
-        .btn-export-server {
-            background-color: #007bff;
-            color: white;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .success-message {
-            background-color: #155724;
-            color: #d4edda;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .error-message {
-            background-color: #721c24;
-            color: #f8d7da;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        label, input, button { font-size: 1.2em; }
+        #saved-data { margin-top: 20px; color: green; }
     </style>
 </head>
 <body>
-    <!-- O resto do seu HTML permanece o mesmo -->
-    <header>
-        <div class="container">
-            <div class="logo">✂️</div>
-            <h1>Barbearia DuBeto</h1>
-            <p>Agendamento de clientes</p>
-        </div>
-    </header>
-    
-    <div class="container">
-        <div id="message" class="hidden"></div>
-        
-        <div class="card">
-            <h2>Novo Agendamento</h2>
-            <form id="agendamentoForm">
-                <div class="form-group">
-                    <label for="nome">Nome do Cliente</label>
-                    <input type="text" id="nome" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="telefone">Telefone</label>
-                    <input type="tel" id="telefone" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="servico">Serviço</label>
-                    <select id="servico" required>
-                        <option value="">Selecione um serviço</option>
-                        <option value="Corte de Cabelo">Corte de Cabelo</option>
-                        <option value="Barba">Barba</option>
-                        <option value="Corte + Barba">Corte + Barba</option>
-                        <option value="Pezinho">Pezinho</option>
-                        <option value="Sobrancelha">Sobrancelha</option>
-                        <option value="Navalha">Navalha</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="barbeiro">Barbeiro</label>
-                    <select id="barbeiro" required>
-                        <option value="">Selecione um barbeiro</option>
-                        <option value="João">João</option>
-                        <option value="Carlos">Carlos</option>
-                        <option value="Marcos">Marcos</option>
-                        <option value="Antônio">Antônio</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="data">Data</label>
-                    <input type="date" id="data" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="hora">Hora</label>
-                    <input type="time" id="hora" required>
-                </div>
-                
-                <button type="submit">Agendar</button>
-            </form>
-        </div>
-        
-        <div class="card">
-            <h2>Agendamentos</h2>
-            <div class="actions">
-                <button id="exportBtn" class="btn-export">Exportar para Excel</button>
-                <button id="exportServerBtn" class="btn-export-server">Enviar para Servidor</button>
-            </div>
-            
-            <table id="agendamentosTable">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Telefone</th>
-                        <th>Serviço</th>
-                        <th>Barbeiro</th>
-                        <th>Data</th>
-                        <th>Hora</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="agendamentosBody">
-                    <!-- Os agendamentos serão inseridos aqui via JavaScript -->
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <h2>Preencha seu nome</h2>
+    <form id="nameForm">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required>
+        <button type="submit">Salvar</button>
+    </form>
+    <div id="saved-data"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Carregar agendamentos do localStorage
-            let agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
-            
-            // Elementos do DOM
-            const form = document.getElementById('agendamentoForm');
-            const tableBody = document.getElementById('agendamentosBody');
-            const exportBtn = document.getElementById('exportBtn');
-            const exportServerBtn = document.getElementById('exportServerBtn');
-            const messageDiv = document.getElementById('message');
-            
-            // Função para exibir mensagem
-            function showMessage(text, isError = false) {
-                messageDiv.textContent = text;
-                messageDiv.className = isError ? 'error-message' : 'success-message';
-                messageDiv.classList.remove('hidden');
-                
-                setTimeout(() => {
-                    messageDiv.classList.add('hidden');
-                }, 3000);
+        // Mostrar o nome salvo ao carregar a página
+        window.onload = function() {
+            const nomeSalvo = localStorage.getItem('nome');
+            if (nomeSalvo) {
+                document.getElementById('saved-data').textContent = "Nome salvo: " + nomeSalvo;
             }
-            
-            // Função para renderizar a tabela
-            function renderTable() {
-                tableBody.innerHTML = '';
-                
-                agendamentos.forEach((agendamento, index) => {
-                    const row = document.createElement('tr');
-                    
-                    row.innerHTML = `
-                        <td>${agendamento.nome}</td>
-                        <td>${agendamento.telefone}</td>
-                        <td>${agendamento.servico}</td>
-                        <td>${agendamento.barbeiro}</td>
-                        <td>${formatDate(agendamento.data)}</td>
-                        <td>${agendamento.hora}</td>
-                        <td class="actions">
-                            <button class="btn-delete" data-index="${index}">Excluir</button>
-                        </td>
-                    `;
-                    
-                    tableBody.appendChild(row);
-                });
-                
-                // Adicionar event listeners aos botões de deletar
-                document.querySelectorAll('.btn-delete').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const index = parseInt(this.getAttribute('data-index'));
-                        agendamentos.splice(index, 1);
-                        localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
-                        renderTable();
-                        showMessage('Agendamento removido com sucesso!');
-                    });
-                });
-            }
-            
-            // Função para formatar data
-            function formatDate(dateString) {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('pt-BR');
-            }
-            
-            // Event listener para o formulário
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const novoAgendamento = {
-                    nome: document.getElementById('nome').value,
-                    telefone: document.getElementById('telefone').value,
-                    servico: document.getElementById('servico').value,
-                    barbeiro: document.getElementById('barbeiro').value,
-                    data: document.getElementById('data').value,
-                    hora: document.getElementById('hora').value,
-                    dataAgendamento: new Date().toISOString()
-                };
-                
-                agendamentos.push(novoAgendamento);
-                localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
-                
-                // Limpar o formulário
-                form.reset();
-                
-                // Atualizar a tabela
-                renderTable();
-                
-                // Mostrar mensagem de sucesso
-                showMessage('Agendamento realizado com sucesso!');
-            });
-            
-            // Event listener para exportar para Excel
-            exportBtn.addEventListener('click', function() {
-                if (agendamentos.length === 0) {
-                    showMessage('Nenhum agendamento para exportar!', true);
-                    return;
-                }
-                
-                // Preparar dados p
+        };
+
+        // Salvar o nome ao enviar o formulário
+        document.getElementById('nameForm').onsubmit = function(e) {
+            e.preventDefault();
+            const nome = document.getElementById('nome').value;
+            localStorage.setItem('nome', nome);
+            document.getElementById('saved-data').textContent = "Nome salvo: " + nome;
+            document.getElementById('nome').value = "";
+        };
+    </script>
+</body>
+</html>
