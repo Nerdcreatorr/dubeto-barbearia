@@ -1,0 +1,270 @@
+ttom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">✂️</div>
+            <h1>Barbearia DuBeto</h1>
+            <p>Agendamento de clientes</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div id="message" class="hidden"></div>
+        
+        <div class="card">
+            <h2>Novo Agendamento</h2>
+            <form id="agendamentoForm">
+                <div class="form-group">
+                    <label for="nome">Nome do Cliente</label>
+                    <input type="text" id="nome" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefone">Telefone</label>
+                    <input type="tel" id="telefone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="servico">Serviço</label>
+                    <select id="servico" required>
+                        <option value="">Selecione um serviço</option>
+                        <option value="Corte de Cabelo">Corte de Cabelo</option>
+                        <option value="Barba">Barba</option>
+                        <option value="Corte + Barba">Corte + Barba</option>
+                        <option value="Pezinho">Pezinho</option>
+                        <option value="Sobrancelha">Sobrancelha</option>
+                        <option value="Navalha">Navalha</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="barbeiro">Barbeiro</label>
+                    <select id="barbeiro" required>
+                        <option value="">Selecione um barbeiro</option>
+                        <option value="João">João</option>
+                        <option value="Carlos">Carlos</option>
+                        <option value="Marcos">Marcos</option>
+                        <option value="Antônio">Antônio</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="data">Data</label>
+                    <input type="date" id="data" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="hora">Hora</label>
+                    <input type="time" id="hora" required>
+                </div>
+                
+                <button type="submit">Agendar</button>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h2>Agendamentos</h2>
+            <div class="actions">
+                <button id="exportBtn" class="btn-export">Exportar para Excel</button>
+                <button id="exportServerBtn" class="btn-export-server">Enviar para Servidor</button>
+            </div>
+            
+            <table id="agendamentosTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Telefone</th>
+                        <th>Serviço</th>
+                        <th>Barbeiro</th>
+                        <th>Data</th>
+                        <th>Hora</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="agendamentosBody">
+                    <!-- Os agendamentos serão inseridos aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar agendamentos do localStorage
+            let agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+            
+            // Elementos do DOM
+            const form = document.getElementById('agendamentoForm');
+            const tableBody = document.getElementById('agendamentosBody');
+            const exportBtn = document.getElementById('exportBtn');
+            const exportServerBtn = document.getElementById('exportServerBtn');
+            const messageDiv = document.getElementById('message');
+            
+            // Função para exibir mensagem
+            function showMessage(text, isError = false) {
+                messageDiv.textContent = text;
+                messageDiv.className = isError ? 'error-message' : 'success-message';
+                messageDiv.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    messageDiv.classList.add('hidden');
+                }, 3000);
+            }
+            
+            // Função para renderizar a tabela
+            function renderTable() {
+                tableBody.innerHTML = '';
+                
+                agendamentos.forEach((agendamento, index) => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${agendamento.nome}</td>
+                        <td>${agendamento.telefone}</td>
+                        <td>${agendamento.servico}</td>
+                        <td>${agendamento.barbeiro}</td>
+                        <td>${formatDate(agendamento.data)}</td>
+                        <td>${agendamento.hora}</td>
+                        <td class="actions">
+                            <button class="btn-delete" data-index="${index}">Excluir</button>
+                        </td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // Adicionar event listeners aos botões de deletar
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        agendamentos.splice(index, 1);
+                        localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+                        renderTable();
+                        showMessage('Agendamento removido com sucesso!');
+                    });
+                });
+            }
+            
+            // Função para formatar data
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('pt-BR');
+            }
+            
+            // Event listener para o formulário
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const novoAgendamento = {
+                    nome: document.getElementById('nome').value,
+                    telefone: document.getElementById('telefone').value,
+                    servico: document.getElementById('servico').value,
+                    barbeiro: document.getElementById('barbeiro').value,
+                    data: document.getElementById('data').value,
+                    hora: document.getElementById('hora').value,
+                    dataAgendamento: new Date().toISOString()
+                };
+                
+                agendamentos.push(novoAgendamento);
+                localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+                
+                // Limpar o formulário
+                form.reset();
+                
+                // Atualizar a tabela
+                renderTable();
+                
+                // Mostrar mensagem de sucesso
+                showMessage('Agendamento realizado com sucesso!');
+            });
+            
+            // Event listener para exportar para Excel
+            exportBtn.addEventListener('click', function() {
+                if (agendamentos.length === 0) {
+                    showMessage('Nenhum agendamento para exportar!', true);
+                    return;
+                }
+                
+                // Preparar dados para exportação
+                const dadosExportacao = agendamentos.map(agendamento => ({
+                    'Nome': agendamento.nome,
+                    'Telefone': agendamento.telefone,
+                    'Serviço': agendamento.servico,
+                    'Barbeiro': agendamento.barbeiro,
+                    'Data': formatDate(agendamento.data),
+                    'Hora': agendamento.hora,
+                    'Data do Agendamento': formatDate(agendamento.dataAgendamento)
+                }));
+                
+                // Criar planilha
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(dadosExportacao);
+                XLSX.utils.book_append_sheet(wb, ws, 'Agendamentos');
+                
+                // Exportar arquivo
+                XLSX.writeFile(wb, 'agendamentos_barbearia_dubeto.xlsx');
+                showMessage('Dados exportados para Excel com sucesso!');
+            });
+            
+            // Event listener para exportar para servidor
+            exportServerBtn.addEventListener('click', async function() {
+                if (agendamentos.length === 0) {
+                    showMessage('Nenhum agendamento para enviar!', true);
+                    return;
+                }
+                
+                try {
+                    // Substitua esta URL pelo endpoint real do seu servidor
+                    const serverUrl = 'https://seuservidor.com/api/agendamentos';
+                    
+                    const response = await fetch(serverUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            barbearia: 'Barbearia DuBeto',
+                            agendamentos: agendamentos
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const result = await response.json();
+                        showMessage('Dados enviados para o servidor com sucesso!');
+                        console.log('Resposta do servidor:', result);
+                    } else {
+                        throw new Error('Erro ao enviar dados para o servidor');
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    showMessage('Falha ao enviar dados para o servidor: ' + error.message, true);
+                }
+            });
+            
+            // Renderizar tabela ao carregar a página
+            renderTable();
+        });
+    </script>
+</body>
+</html>          const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(dadosExportacao);
+                XLSX.utils.book_append_sheet(wb, ws, "Agendamentos");
+                
+                // Estilizar (simplificado - o XLSX.js tem limitações de estilo)
+                // Gerar arquivo
+                const nomeArquivo = `agendamentos_barbearia_${new Date().toISOString().slice(0,10)}.xlsx`;
+                XLSX.writeFile(wb, nomeArquivo);
+                
+                showMessage('Planilha exportada com sucesso!');
+            });
+            
+            // Renderizar tabela inicial
+            renderTable();
+        });
+    </script>
+</body>
+</html>
