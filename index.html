@@ -2,38 +2,36 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Salvar Nome Localmente</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 50px; }
-        label, input, button { font-size: 1.2em; }
-        #saved-data { margin-top: 20px; color: green; }
-    </style>
+    <title>Enviar Nome para o Servidor</title>
 </head>
 <body>
     <h2>Preencha seu nome</h2>
     <form id="nameForm">
         <label for="nome">Nome:</label>
         <input type="text" id="nome" name="nome" required>
-        <button type="submit">Salvar</button>
+        <button type="submit">Enviar</button>
     </form>
-    <div id="saved-data"></div>
+    <div id="response"></div>
 
     <script>
-        // Mostrar o nome salvo ao carregar a página
-        window.onload = function() {
-            const nomeSalvo = localStorage.getItem('nome');
-            if (nomeSalvo) {
-                document.getElementById('saved-data').textContent = "Nome salvo: " + nomeSalvo;
-            }
-        };
-
-        // Salvar o nome ao enviar o formulário
         document.getElementById('nameForm').onsubmit = function(e) {
             e.preventDefault();
             const nome = document.getElementById('nome').value;
-            localStorage.setItem('nome', nome);
-            document.getElementById('saved-data').textContent = "Nome salvo: " + nome;
-            document.getElementById('nome').value = "";
+
+            fetch('https://SEU-SERVIDOR.com/api/salvar-nome', { // troque pela URL do seu backend
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nome: nome })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response').textContent = "Nome salvo com sucesso!";
+            })
+            .catch(error => {
+                document.getElementById('response').textContent = "Erro ao salvar.";
+            });
         };
     </script>
 </body>
